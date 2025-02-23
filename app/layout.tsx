@@ -8,7 +8,7 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-export const modista = localFont({
+const modista = localFont({
   src: "../fonts/Modista.woff2",
   variable: "--font-modista",
 });
