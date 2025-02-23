@@ -1,0 +1,701 @@
+---
+title: "Handlers Overview"
+date: "2025-02-22"
+---
+
+### Core Information
+
+#### **Info**
+
+- **Action:** `Info`
+- **Purpose:** Returns overall contract metadata (name, symbol, version, description, max supply, total supply) along with module-specific info (Pausable, Roles, Royalty).
+
+```lua
+Handlers.add('info', { Action = "Info" }, function(msg)
+    local info = {
+        Name             = "ZoAO zNFT Standard Token",
+        Symbol           = "zNFT",
+        Version          = Version,
+        Description      = "A generic and extensible NFT standard for the Ao ecosystem.",
+        ["Max-Supply"]   = tostring(MaxSupply),
+        ["Total-Supply"] = tostring(TotalSupply),
+    }
+
+    msg.reply({
+        Tags = info,
+        Data = json.encode({
+            -- Modules Info
+            ["Pausable"] = pausable.info(),
+            ["Roles"]    = roles.info(),
+            ["Royalty"]  = royalty.info()
+        })
+    })
+end)
+```
+
+#### **Get-Royalty**
+
+- **Action:** `Get-Royalty`
+- **Purpose:** Retrieves the current global royalty settings (recipient and percentage).
+
+```lua
+Handlers.add('getRoyalty', { Action = "Get-Royalty" }, function(msg)
+    local r = royalty.getRoyalty()
+
+    msg.reply({
+        Tags = {
+            Action    = "Get-Royalty",
+            Recipient = r.recipient,
+            Percent   = tostring(r.percent)
+        }
+    })
+end)
+```
+
+#### **Total-Supply**
+
+- **Action:** `Total-Supply`
+- **Purpose:** Provides the total number of NFTs that have been minted.
+
+```lua
+Handlers.add('totalSupply', { Action = 'Total-Supply' }, function(msg)
+    msg.reply({
+        Tags = {
+            Action = "Total-Supply/Response",
+            Supply = tostring(TotalSupply)
+        }
+    })
+end)
+```
+
+### Royalty Handlers
+
+#### **Roles/Add**
+
+- **Action:** `Roles/Add`
+- **Purpose:** Adds a specified role to an address.
+- **Guard:** OnlyAdminGuard
+
+```lua
+Handlers.add('addRole', { Action = 'Roles/Add' },
+    WithErrorCatcher("Roles/Add",
+        OnlyAdminGuard(function(msg)
+            assert(msg.Tags.Address, "Address is required")
+            assert(msg.Tags.Role, "Role is required")
+
+            roles.addRole(msg.Tags.Address, msg.Tags.Role)
+
+            msg.reply({
+                Tags = {
+                    Action  = "Roles/Add/Success",
+                    Address = msg.Tags.Address,
+                    Role    = msg.Tags.Role
+                },
+                Data = json.encode({
+                    Roles = roles.getRoles(msg.Tags.Address)
+                })
+            })
+        end)
+    )
+)
+```
+
+#### **Roles/Remove**
+
+- **Action:** `Roles/Remove`
+- **Purpose:** Removes a specified role from an address.
+- **Guard:** OnlyAdminGuard
+
+```lua
+Handlers.add('removeRole', { Action = 'Roles/Remove' },
+    WithErrorCatcher("Roles/Remove",
+        OnlyAdminGuard(function(msg)
+            assert(msg.Tags.Address, "Address is required")
+            assert(msg.Tags.Role, "Role is required")
+
+            roles.removeRole(msg.Tags.Address, msg.Tags.Role)
+
+            msg.reply({
+                Tags = {
+                    Action  = "Roles/Remove/Success",
+                    Address = msg.Tags.Address,
+                    Role    = msg.Tags.Role
+                },
+                Data = json.encode({
+                    Roles = roles.getRoles(msg.Tags.Address)
+                })
+            })
+        end)
+    )
+)
+```
+
+#### **Roles/Get-Roles**
+
+- **Action:** `Roles/Get-Roles`
+- **Purpose:** Retrieves all roles assigned to an address.
+
+```lua
+Handlers.add('getRolesHandler', { Action = 'Roles/Get-Roles' },
+    WithErrorCatcher("Roles/Get-Roles",
+        function(msg)
+            assert(msg.Tags.Address, "Address is required")
+
+            msg.reply({
+                Tags = {
+                    Action  = "Roles/Get-Roles/Success",
+                    Address = msg.Tags.Address
+                },
+                Data = json.encode({
+                    Roles = roles.getRoles(msg.Tags.Address)
+                })
+            })
+        end
+    )
+)
+```
+
+### Pausable Handlers
+
+#### **Pausable/Pause**
+
+- **Action:** `Pausable/Pause`
+- **Purpose:** Pauses the contract to block operations during emergencies.
+- **Guard:** OnlyAdminGuard
+
+```lua
+Handlers.add('pauseContract', { Action = 'Pausable/Pause' },
+    WithErrorCatcher("Pausable/Pause",
+        OnlyAdminGuard(function(msg)
+            pausable.pause()
+
+            msg.reply({
+                Tags = {
+                    Action = "Pausable/Pause/Success",
+                    Paused = "true"
+                }
+            })
+        end)
+    )
+)
+```
+
+#### **Pausable/Unpause**
+
+- **Action:** `Pausable/Unpause`
+- **Purpose:** Resumes contract operations.
+- **Guard:** OnlyAdminGuard
+
+```lua
+Handlers.add('unpauseContract', { Action = 'Pausable/Unpause' },
+    WithErrorCatcher("Pausable/Unpause",
+        OnlyAdminGuard(function(msg)
+            pausable.unpause()
+
+            msg.reply({
+                Tags = {
+                    Action = "Pausable/Unpause/Success",
+                    Paused = "false"
+                }
+            })
+        end)
+    )
+)
+```
+
+### Management Handlers (Admin Only)
+
+#### **Manage/Set-Max-Supply**
+
+- **Action:** `Manage/Set-Max-Supply`
+- **Purpose:** Updates the maximum allowable supply of tokens.
+
+```lua
+Handlers.add('setMaxSupply', { Action = "Manage/Set-Max-Supply" },
+    WithErrorCatcher("Manage/Set-Max-Supply",
+        OnlyAdminGuard(function(msg)
+            assert(msg.Tags["Max-Supply"], "Max-Supply is required!")
+
+            local newMaxSupply = tonumber(msg.Tags["Max-Supply"])
+            assert(newMaxSupply, "Max-Supply must be a valid number!")
+
+            MaxSupply = newMaxSupply
+
+            msg.reply({
+                Tags = {
+                    Action         = "Manage/Set-Max-Supply/Success",
+                    ["Max-Supply"] = tostring(MaxSupply)
+                },
+            })
+        end)
+    )
+)
+```
+
+#### **Manage/Set-Royalty**
+
+- **Action:** `Manage/Set-Royalty`
+- **Purpose:** Configures the global royalty settings.
+
+```lua
+Handlers.add('setRoyalty', { Action = "Manage/Set-Royalty" },
+    WithErrorCatcher("Manage/Set-Royalty",
+        OnlyAdminGuard(function(msg)
+            assert(msg.Tags.Recipient, "Recipient is required!")
+            assert(msg.Tags.Percent, "Percent is required!")
+
+            local recipient = msg.Tags.Recipient
+            local percent = tonumber(msg.Tags.Percent)
+            assert(percent, "Percent must be a number!")
+
+            royalty.setRoyalty(recipient, percent)
+
+            msg.reply({
+                Tags = {
+                    Action    = "Manage/Set-Royalty/Success",
+                    Recipient = recipient,
+                    Percent   = tostring(percent)
+                }
+            })
+        end)
+    )
+)
+```
+
+### Minting Tokens (Minter)
+
+#### **Mint**
+
+- **Action:** `Mint`
+- **Purpose:** Mints a new NFT by assigning a recipient and setting structured metadata.
+- **Guard:** OnlyMinterGuard
+
+```lua
+Handlers.add('mint', { Action = "Mint" },
+    WithErrorCatcher("Mint",
+        pausable.guard(
+            OnlyMinterGuard(
+                function(msg)
+                    assert(msg.Tags.Recipient, "Recipient is required!")
+                    assert(msg.Tags.Metadata, "Metadata is required!")
+
+                    -- Validate metadata
+                    local mt = json.decode(msg.Tags.Metadata)
+                    assert(mt, "Invalid metadata format")
+
+                    local valid, err = metadata.validateMetadata(mt)
+                    assert(valid, err)
+
+                    -- Check supply constraints
+                    assert(TotalSupply < MaxSupply, "Max supply reached!")
+
+                    -- Generate new token ID
+                    local tokenId = tostring(#AllTokens + 1)
+
+                    -- Create new token
+                    Tokens[tokenId] = {
+                        owner    = msg.Tags.Recipient,
+                        metadata = mt
+                    }
+
+                    -- Update global state
+                    table.insert(AllTokens, tokenId)
+                    TotalSupply = TotalSupply + 1
+
+                    msg.reply({
+                        Tags = {
+                            Action = "Mint/Success",
+                            ["Token-Id"] = tokenId,
+                            Recipient = msg.Tags.Recipient
+                        },
+                        Data = json.encode(Tokens[tokenId])
+                    })
+                end
+            )
+        )
+    )
+)
+```
+
+#### **Manage/Update-Metadata**
+
+- **Action:** `Manage/Update-Metadata`
+- **Purpose:** Updates token metadata (only if metadata is not frozen; minter only).
+- **Guard:** OnlyMinterGuard
+
+```lua
+Handlers.add('updateMetadata', { Action = "Manage/Update-Metadata" },
+    WithErrorCatcher("Manage/Update-Metadata",
+        pausable.guard(
+            OnlyMinterGuard(
+                function(msg)
+                    assert(msg.Tags["Token-Id"], "Token-Id is required")
+                    assert(msg.Tags.Metadata,
+                        "Metadata is required")
+
+                    -- Retrieve token
+                    local tokenId = msg.Tags["Token-Id"]
+                    local token = Tokens[tokenId]
+                    assert(token, "Token Id " .. tokenId .. " does not exist")
+
+                    -- Check if metadata is frozen
+                    assert(not token.metadata.isFrozen, "Metadata is frozen")
+
+
+                    -- Validate metadata
+                    local mt = json.decode(msg.Tags.Metadata)
+                    assert(mt, "Invalid metadata format")
+
+                    local valid, err = metadata.validateMetadata(mt)
+                    assert(valid, err)
+
+                    -- Update metadata
+                    token.metadata = mt
+
+                    msg.reply({
+                        Tags = {
+                            Action = "Manage/Update-Metadata/Success",
+                            ["Token-Id"] = tokenId,
+                        },
+                        Data = json.encode(token.metadata)
+                    })
+                end
+            )
+        )
+    )
+)
+```
+
+### Token Operations
+
+#### **Balance-Of**
+
+- **Action:** `Balance-Of`
+- **Purpose:** Returns the list and count of tokens owned by an address.
+
+```lua
+Handlers.add('balanceOf', { Action = 'Balance-Of' },
+    WithErrorCatcher("Balance-Of",
+        function(msg)
+            local address = msg.Tags.Address or msg.From
+            local tokenIds = {}
+
+            for _, tokenId in ipairs(AllTokens) do
+                if Tokens[tokenId].owner == address then
+                    table.insert(tokenIds, tokenId)
+                end
+            end
+
+            msg.reply({
+                Tags = {
+                    Action = "Balance-Of/Response",
+                    Address = address,
+                    Count = tostring(#tokenIds)
+                },
+                Data = json.encode(tokenIds)
+            })
+        end
+    )
+)
+```
+
+#### **Owner-Of**
+
+- **Action:** `Owner-Of`
+- **Purpose:** Retrieves the owner for a specific token.
+
+```lua
+Handlers.add('ownerOf', { Action = 'Owner-Of' },
+    WithErrorCatcher("Owner-Of",
+        function(msg)
+            assert(msg.Tags["Token-Id"], "Token-Id is required")
+
+            local tokenId = msg.Tags["Token-Id"]
+            assert(Tokens[tokenId], "Token Id " .. tokenId .. " does not exist")
+
+            local owner = Tokens[tokenId] and Tokens[tokenId].owner or ""
+
+            msg.reply({
+                Tags = {
+                    Action = "Owner-Of/Response",
+                    ["Token-Id"] = tokenId,
+                    Owner = owner
+                }
+            })
+        end
+    )
+)
+```
+
+#### **Token-Metadata**
+
+- **Action:** `Token-Metadata`
+- **Purpose:** Provides metadata for a specific token.
+
+```lua
+Handlers.add('tokenMetadata', { Action = "Token-Metadata" },
+    WithErrorCatcher("Token-Metadata",
+        function(msg)
+            assert(msg.Tags["Token-Id"], "Token-Id is required")
+
+            local tokenId = msg.Tags["Token-Id"]
+            assert(Tokens[tokenId], "Token Id " .. tokenId .. " does not exist")
+
+            msg.reply({
+                Tags = {
+                    Action = "Token-Metadata/Response",
+                    ["Token-Id"] = tokenId
+                },
+                Data = json.encode(Tokens[tokenId])
+            })
+        end
+    )
+)
+```
+
+#### **Token-Metadata-Batch**
+
+- **Action:** `Token-Metadata-Batch`
+- **Purpose:** Returns metadata for multiple tokens in a single request.
+
+```lua
+Handlers.add('batchTokenMetadata', { Action = "Token-Metadata-Batch" },
+    WithErrorCatcher("Token-Metadata-Batch",
+        function(msg)
+            assert(msg.Tags["Token-Ids"], "Token-Ids are required")
+
+            local tokenIds = json.decode(msg.Tags)
+            assert(tokenIds, "Invalid Token-Ids format")
+
+            local mt = {}
+
+            for _, tokenId in ipairs(tokenIds) do
+                if Tokens[tokenId] then
+                    mt[tokenId] = Tokens[tokenId]
+                end
+            end
+
+            msg.reply({
+                Tags = {
+                    Action = "Token-Metadata-Batch/Response",
+                    Count = tostring(#mt)
+                },
+                Data = json.encode(mt)
+            })
+        end
+    )
+)
+```
+
+#### **Transfer**
+
+- **Action:** `Transfer`
+- **Purpose:** Transfers token ownership from one address to another.
+
+```lua
+Handlers.add('transfer', Handlers.utils.hasMatchingTag('Action', 'Transfer'),
+    WithErrorCatcher("Transfer",
+        pausable.guard(
+            function(msg)
+                assert(msg.Tags["Token-Id"], "Token-Id is required")
+                assert(msg.Tags.Recipient, "Recipient is required")
+
+                local tokenId = msg.Tags["Token-Id"]
+                local token = Tokens[tokenId]
+
+                assert(token, "Token Id " .. tokenId .. " does not exist")
+
+                local sender = msg.From
+                local isApproved = (TokenApprovals[tokenId] == sender)
+                    or (OperatorApprovals[token.owner] and OperatorApprovals[token.owner][sender])
+
+                assert(token.owner == sender or isApproved, "Not authorized to transfer this token")
+
+                -- Clear approval, update owner
+                TokenApprovals[tokenId] = nil
+                token.owner = msg.Tags.Recipient
+
+                if not msg.Tags.Cast then
+                    -- Debit notice
+                    ao.send({
+                        Target = sender,
+                        Tags = {
+                            Action = 'NFT/Debit-Notice',
+                            ["Token-Id"] = tokenId,
+                            Recipient = msg.Tags.Recipient
+                        }
+                    })
+                    -- Credit notice
+                    ao.send({
+                        Target = msg.Tags.Recipient,
+                        Tags = {
+                            Action = 'NFT/Credit-Notice',
+                            ["Token-Id"] = tokenId,
+                            Sender = sender
+                        }
+                    })
+                end
+
+                msg.reply({
+                    Tags = {
+                        Action = "Transfer/Success",
+                        ["Token-Id"] = tokenId,
+                        Recipient = msg.Tags.Recipient
+                    }
+                })
+            end
+        )
+    )
+)
+```
+
+#### **Approve**
+
+- **Action:** `Approve`
+- **Purpose:** Approves a specified address to transfer a token.
+
+```lua
+Handlers.add('approve', { Action = "Approve" },
+    WithErrorCatcher("Approve",
+        pausable.guard(
+            function(msg)
+                assert(msg.Tags["Token-Id"], "Token-Id is required")
+                assert(msg.Tags.Address, "Address is required")
+
+                local tokenId = msg.Tags["Token-Id"]
+                local token = Tokens[tokenId]
+
+                assert(token, "Token Id " .. tokenId .. " does not exist")
+                assert(token.owner == msg.From, "Not authorized to approve this token")
+
+                TokenApprovals[tokenId] = msg.Tags.Address
+
+                msg.reply({
+                    Tags = {
+                        Action = "Approve/Success",
+                        ["Token-Id"] = tokenId,
+                        Address = msg.Tags.Address
+                    }
+                })
+            end
+        )
+    )
+)
+```
+
+#### **Get-Approved**
+
+- **Action:** `Get-Approved`
+- **Purpose:** Retrieves the address approved to transfer a specific token.
+
+```lua
+Handlers.add('getApproved', { Action = "Get-Approved" },
+    WithErrorCatcher("Get-Approved",
+        function(msg)
+            assert(msg.Tags["Token-Id"], "Token-Id is required")
+
+            local tokenId = msg.Tags["Token-Id"]
+            local approved = TokenApprovals[tokenId] or ""
+
+            msg.reply({
+                Tags = {
+                    Action = "Get-Approved/Response",
+                    ["Token-Id"] = tokenId,
+                    Address = approved
+                }
+            })
+        end
+    )
+)
+```
+
+#### **Set-Approval-For-All**
+
+- **Action:** `Set-Approval-For-All`
+- **Purpose:** Approves or revokes an operator for managing all tokens owned by the sender.
+
+```lua
+Handlers.add('setApprovalForAll', { Action = "Set-Approval-For-All" },
+    WithErrorCatcher(
+        "Set-Approval-For-All",
+        pausable.guard(
+            function(msg)
+                assert(msg.Tags.Operator, "Operator is required")
+
+                OperatorApprovals[msg.From] = OperatorApprovals[msg.From] or {}
+                OperatorApprovals[msg.From][msg.Tags.Operator] = true
+
+                msg.reply({
+                    Tags = {
+                        Action = "Set-Approval-For-All/Success",
+                        Owner = msg.From,
+                        Operator = msg.Tags.Operator,
+                        Approved = "true"
+                    }
+                })
+            end
+        )
+    )
+)
+```
+
+#### **Is-Approved-For-All**
+
+- **Action:** `Is-Approved-For-All`
+- **Purpose:** Checks whether an operator is approved to manage all tokens for a given owner.
+
+```lua
+Handlers.add('isApprovedForAll', { Action = "Is-Approved-For-All" },
+    WithErrorCatcher("Is-Approved-For-All",
+        function(msg)
+            assert(msg.Tags.Owner, "Owner is required")
+            assert(msg.Tags.Operator, "Operator is required")
+
+            local approved = OperatorApprovals[msg.Tags.Owner] and OperatorApprovals[msg.Tags.Owner][msg.Tags.Operator]
+
+            msg.reply({
+                Tags = {
+                    Action = "Is-Approved-For-All/Response",
+                    Owner = msg.Tags.Owner,
+                    Operator = msg.Tags.Operator,
+                    Approved = approved and "true" or "false"
+                }
+            })
+        end
+    )
+)
+```
+
+#### **All-Tokens**
+
+- **Action:** `All-Tokens`
+- **Purpose:** Retrieves a subset of token IDs, useful for pagination or UI indexing.
+
+```lua
+Handlers.add('allTokens', { Action = 'All-Tokens' },
+    WithErrorCatcher("All-Tokens",
+        function(msg)
+            local start = tonumber(msg.Tags.Start) or 1
+            local count = tonumber(msg.Tags.Count) or #AllTokens
+
+            local tokens = {}
+            for i = start, math.min(start + count - 1, #AllTokens) do
+                table.insert(tokens, AllTokens[i])
+            end
+
+            msg.reply({
+                Tags = {
+                    Action = "All-Tokens/Response",
+                    Start = tostring(start),
+                    Count = tostring(count)
+                },
+                Data = json.encode(tokens)
+            })
+        end
+    )
+)
+```
+
+---
+
+This documentation provides a comprehensive blueprint for the ZoAO zNFT Token Standard. It outlines all the key features, usage instructions, and a detailed overview of the handler operations to serve as a definitive guide for developers implementing or interacting with this standard.

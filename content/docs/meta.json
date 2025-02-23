@@ -1,0 +1,17 @@
+{
+    "title": "ZoAO.tech",
+    "root": true,
+    "pages": [
+        "index",
+        "znft",
+        "tools",
+        "governance",
+        "---Zoo Keepers Genesis---",
+        "./zoo-keepers/overview",
+        "./zoo-keepers/mint-process",
+        "./zoo-keepers/metadata-format",
+        "./zoo-keepers/genome",
+        "---ZoAO.market---",
+        "./zoao-market/overview"
+    ]
+}

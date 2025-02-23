@@ -1,0 +1,87 @@
+---
+title: "Genome"
+date: "2025-02-22"
+---
+
+For the Zoo Keeper Genesis campaign, we extend the standard zNFT metadata by integrating a campaign-specific genome as an additional attribute. While the standard metadata does not include the genome, the Zoo Keeper Genesis campaign appends it to the attributes array to uniquely capture the token’s genetic blueprint.
+
+_Example additional attribute for genome:_
+
+```json
+{
+  "trait_type": "Genome",
+  "value": "0109010306020a000b030c010e000f031000070215002c012e02"
+}
+```
+
+This additional attribute enables future dynamic functionalities such as breeding mechanics.
+
+---
+
+## High-Level Overview
+
+The encoding process is designed to be both efficient and secure. In broad strokes, the process works as follows:
+
+1. **Version Byte:**  
+   The first byte of the genome represents the schema version. This allows us to upgrade the encoding process in the future without breaking compatibility.
+
+2. **Species Byte:**  
+   The next byte encodes the "Species" trait, a required attribute that forms the basis of the character's identity.
+
+3. **Rarity Pair:**  
+   Following the species, a dedicated pair of bytes encodes the rarity information of the zNFT.
+
+4. **Additional Trait Pairs:**  
+   The remaining 7-10 traits are encoded as pairs of bytes (each pair consisting of a trait ID and its corresponding value ID).
+
+Together, these components are combined to form a single hexadecimal string that uniquely identifies the genetic blueprint of each zNFT.
+
+---
+
+## Genome Structure Diagram
+
+Below is a simplified diagram that visualizes the genome layout:
+
+<div className="text-2xl text-center flex items-center justify-center font-black font-mono">
+  <span className="text-orange-300">01</span> &middot;
+  <span className="text-green-300">09</span> &middot;
+  <span className="text-blue-400">0103</span> &middot;
+  <span className="text-zinc-500">0602</span> &middot;
+  <span className="text-zinc-500">0a00</span> &middot;
+  <span className="text-zinc-500">0b03</span> &middot;
+  <span className="text-zinc-500">...</span>
+</div>
+
+<div className="flex items-center space-x-4">
+  <span className="bg-orange-300 font-mono text-black rounded-lg px-2 h-10 flex items-center">
+    01: Version Byte
+  </span>
+  <span className="bg-green-300 font-mono text-black rounded-lg px-2 h-10 flex items-center">
+    09: Species Trait
+  </span>
+  <span className="bg-blue-400 font-mono text-black rounded-lg px-2 h-10 flex items-center">
+    0103: Rarity Pair
+  </span>
+  <span className="bg-zinc-500 font-mono text-black rounded-lg px-2 h-10 flex items-center">
+    Other traits
+  </span>
+</div>
+
+<Callout>
+  Note: The additional traits include various attributes that further define the
+  token’s unique characteristics. While the precise encoding algorithm is
+  proprietary, this high-level overview provides insight into how we create a
+  compact, yet powerful, genetic blueprint for each Zoo Keeper Genesis zNFT.
+</Callout>
+
+## Integration into NFT Metadata
+
+Once the genome is generated, it is seamlessly integrated into the NFT’s metadata as a campaign-specific attribute.
+
+This extra layer of data not only distinguishes Zoo Keeper Genesis tokens from standard zNFTs but also lays the groundwork for dynamic future functionalities like evolution and breeding.
+
+## Summary
+
+The Genome Encoding process is a key innovation in the Zoo Keeper Genesis campaign. By converting detailed token traits into a unique, encoded string, we ensure that each NFT possesses a verifiable and immutable genetic identity. This process underpins the campaign’s long-term vision of interactive, evolving digital collectibles.
+
+_For further details on how the genome integrates with the overall minting and metadata processes, please refer to the [Minting Process](/docs/zoo-keepers/mint-process) page._

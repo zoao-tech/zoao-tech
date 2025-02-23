@@ -1,0 +1,85 @@
+---
+title: "zNFT Metadata Structure"
+date: "2025-02-22"
+---
+
+The zNFT Metadata Structure provides a consistent format for all tokens within the ZoAO ecosystem. This schema is designed to ensure compatibility, extensibility, and security while allowing campaign-specific enhancements—such as the genome attribute used in the [Zoo Keepers Genesis](/docs/zoo-keepers/overview) campaign.
+
+---
+
+## Standard Metadata Schema
+
+Each zNFT token metadata object includes the following fields:
+
+- **version**:  
+  A string representing the schema version. This helps with future upgrades and backward compatibility.
+
+- **name**:  
+  A human-readable token name.
+
+- **description**:  
+  A detailed narrative of the token.
+
+- **media**:  
+  An array of media objects, each containing:
+  - `id`: Unique identifier for the media.
+  - `url`: Direct link to the media.
+  - `mimeType`: MIME type of the media (e.g., `image/png`).
+  - `alt`: *(Optional)* Alternative text for accessibility.
+
+- **attributes**:  
+  An array of attribute objects, where each attribute consists of:
+  - `trait_type`: The name of the trait (e.g., "Rarity", "Background Color").
+  - `value`: The corresponding value of the trait.
+
+- **properties**:  
+  An extensible object for additional metadata, where both keys and values are strings.
+
+- **isFrozen**:  
+  A flag (`"true"` or `"false"`) that indicates whether the metadata is locked from further modifications. Defaults to `"false"`.
+
+Below is an example of the standard metadata JSON structure:
+
+```json
+{
+  "version": "0.1.0",
+  "name": "Token Name",
+  "description": "A detailed description of the token.",
+  "media": [
+    {
+      "url": "https://example.com/image1.png",
+      "mimeType": "image/png",
+      "alt": "Primary view of the token"
+    }
+  ],
+  "attributes": [
+    {
+      "trait_type": "Rarity",
+      "value": "Legendary"
+    },
+    {
+      "trait_type": "Background Color",
+      "value": "Red"
+    }
+  ],
+  "properties": {
+    "customField1": "value1",
+    "customField2": "value2"
+  },
+  "isFrozen": "false"
+}
+```
+
+## Metadata Validation
+
+To ensure consistency and correctness, the metadata needs to be validated against this schema. The validation must check that all required fields are present and correctly formatted, ensuring robust integration and a seamless user experience across the ecosystem.
+
+Learn more about the [metadata validation process](/docs/znft/metadata-validation).
+
+<Callout type="warn">
+  The metadata validation process is crucial for maintaining the integrity of the ZoAO ecosystem. It ensures that all tokens adhere to the defined schema, preventing potential issues that could arise from malformed or incomplete metadata.
+</Callout>
+
+## Summary
+
+_The zNFT Metadata Structure provides a flexible yet robust foundation for all tokens in the ZoAO ecosystem. By adhering to this schema, we can ensure a consistent and extensible approach to metadata management, paving the way for future innovations and enhancements._

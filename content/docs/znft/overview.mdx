@@ -1,0 +1,23 @@
+---
+title: "Overview"
+date: "2025-02-22"
+---
+
+**Version:** 0.1.0
+
+The zNFT Token Standard documentation provides a comprehensive technical overview of how NFTs are designed, minted, and integrated within the ZoAO ecosystem.
+
+This guide is intended for developers and technical partners who wish to understand the underlying protocols, code implementations, and integration blueprints that ensure seamless compatibility with [zoao.market](/docs/zoao-market/overview.tsx) and other future platforms.
+
+---
+
+## Features
+
+The zNFT Token Standard is designed to support robust, secure, and extensible non-fungible tokens that meet the following objectives:
+
+- **Supply Constraints (MaxSupply):** Enforces a hard cap on the total number of tokens that can be minted, ensuring scarcity and controlled issuance.
+- **Pausable Mechanism:** Provides the ability to pause and unpause the contract, allowing for maintenance or emergency intervention while protecting token operations.
+- **Role-Based Access Control:** Uses a robust roles module to restrict sensitive operations to authorized accounts (e.g., minters and administrators).
+- **Enhanced Metadata:** Supports extended metadata fields including name, description, metadata, and an `isFrozen` flag to denote if the metadata is immutable.
+- **Metadata Freeze:** Offers a mechanism to permanently lock metadata, ensuring that once finalized, the token’s information remains unchanged.
+- **Global Royalty Mechanism:** Integrates a royalty module to enforce and manage global royalty settings, enabling automated distribution of royalty fees on secondary sales.

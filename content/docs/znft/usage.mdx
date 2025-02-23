@@ -1,0 +1,40 @@
+---
+title: "Usage & Flow"
+date: "2025-02-22"
+---
+
+## **Role Setup**
+
+   - **Assign Roles:** Use the role management handlers (`Roles/Add`, `Roles/Remove`, `Roles/Get-Roles`) to assign roles such as `admin` and `minter`.
+
+## **Minting**
+
+   - **Mint New Tokens:**  
+     Use the `Mint` handler by providing a recipient and valid structured metadata.
+   - **Supply Check:**  
+     The minting process verifies that the total number of minted tokens does not exceed the maximum supply.
+
+## **Metadata Management**
+
+   - **Update Metadata:**  
+     The `Manage/Update-Metadata` handler allows updating token metadata unless it has been frozen.
+   - **Freeze Metadata:**  
+     Metadata can be frozen to ensure immutability.
+
+## **Contract Pausing**
+
+   - **Pause/Unpause:**  
+     The `Pausable/Pause` and `Pausable/Unpause` handlers allow an admin to pause or resume the contract.
+
+## **Royalty Management**
+
+   - **Configure Royalties:**  
+     The `Manage/Set-Royalty` handler is used by an admin to set the global royalty percentage and recipient.
+   - **Query Royalties:**  
+     The `Get-Royalty` handler retrieves the current royalty settings.
+
+## **NFT Operations**
+   - **Transfers, Approvals, and Burning:**  
+     Standard handlers (e.g., `Transfer`, `Approve`, `Get-Approved`, `Set-Approval-For-All`, `Is-Approved-For-All`, `Burn`) enable typical NFT operations.
+   - **Query Functions:**  
+     Handlers such as `Balance-Of`, `Owner-Of`, `Token-Metadata`, and `All-Tokens` provide necessary information for UI display or indexing.
