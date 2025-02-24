@@ -9,44 +9,49 @@ The zNFT Metadata Structure provides a consistent format for all tokens within t
 
 ## Standard Metadata Schema
 
-Each zNFT token metadata object includes the following fields:
+import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 
-- **version**:  
-  A string representing the schema version. This helps with future upgrades and backward compatibility.
+<Tabs items={['JSON','TypeScript']}>
+  <Tab value="TypeScript">
+  ```ts
+  interface MediaObject {
+    id: string;
+    url: string;
+    mimeType: string;
+    alt?: string;
+  }
 
-- **name**:  
-  A human-readable token name.
+interface Attribute {
+    display_type?: "number" | "boost" | "boost_percentage" | "date" | "string";
+    trait_type: string;
+    value: string;
+  }
 
-- **description**:  
-  A detailed narrative of the token.
-
-- **media**:  
-  An array of media objects, each containing:
-  - `id`: Unique identifier for the media.
-  - `url`: Direct link to the media.
-  - `mimeType`: MIME type of the media (e.g., `image/png`).
-  - `alt`: *(Optional)* Alternative text for accessibility.
-
-- **attributes**:  
-  An array of attribute objects, where each attribute consists of:
-  - `trait_type`: The name of the trait (e.g., "Rarity", "Background Color").
-  - `value`: The corresponding value of the trait.
-
-- **properties**:  
-  An extensible object for additional metadata, where both keys and values are strings.
-
-- **isFrozen**:  
-  A flag (`"true"` or `"false"`) that indicates whether the metadata is locked from further modifications. Defaults to `"false"`.
-
-Below is an example of the standard metadata JSON structure:
-
+  interface Metadata {
+      version: "0.1.0";
+      frozen: boolean;
+      id: string;
+      name: string;
+      description: string;
+      external_url: string;
+      media: MediaObject[];
+      attributes: Attribute[];
+      properties: Record<string, any>;
+  }
+```
+  </Tab>
+  <Tab value="JSON">
 ```json
 {
   "version": "0.1.0",
+  "frozen": "false",
+  "id": "Token ID",
   "name": "Token Name",
   "description": "A detailed description of the token.",
+  "external_url": "ar://0asx0asx00",
   "media": [
     {
+      "id": "profile",
       "url": "https://example.com/image1.png",
       "mimeType": "image/png",
       "alt": "Primary view of the token"
@@ -58,17 +63,111 @@ Below is an example of the standard metadata JSON structure:
       "value": "Legendary"
     },
     {
-      "trait_type": "Background Color",
-      "value": "Red"
+      "display_type": "number",
+      "trait_type": "Power",
+      "value": "100"
     }
   ],
   "properties": {
     "customField1": "value1",
     "customField2": "value2"
   },
-  "isFrozen": "false"
 }
 ```
+  </Tab>
+</Tabs>
+
+Each zNFT token metadata object includes the following fields:
+
+import { TypeTable } from "fumadocs-ui/components/type-table";
+
+<TypeTable
+  type={{
+    version: {
+      description:
+        "The metadata schema version. Constant value set to '0.1.0'.",
+      type: "string",
+      default: "0.1.0",
+    },
+    id: {
+      description: "A unique identifier for the NFT metadata.",
+      type: "string",
+      default: "Token ID",
+    },
+    name: {
+      description: "A human-readable name of the NFT.",
+      type: "string",
+    },
+    description: {
+      description: "A detailed narrative about the NFT.",
+      type: "string",
+    },
+    external_url: {
+      description: "The external link associated with the NFT.",
+      type: "string",
+    },
+    media: {
+      description: "An array of media objects associated with the NFT.",
+      type: "MediaObject[]",
+      typeDescriptionLink:
+        "/docs/znft/metadata-structure#mediaobject-interface",
+    },
+    attributes: {
+      description: "An array of attribute objects representing NFT traits.",
+      type: "Attribute[]",
+      typeDescriptionLink: "/docs/znft/metadata-structure#attributes-interface",
+    },
+    properties: {
+      description: "Extra properties defining NFT stats.",
+      type: "Record<string, any>",
+    },
+  }}
+/>
+
+### MediaObject Interface
+
+<TypeTable
+  type={{
+    id: {
+      description: "A unique identifier for the media object.",
+      type: "string",
+    },
+    url: {
+      description: "The URL of the media file.",
+      type: "string",
+    },
+    mimeType: {
+      description: "The MIME type of the media file.",
+      type: "string",
+    },
+    alt: {
+      description: "An optional alt text for the media file.",
+      type: "string",
+      default: "",
+    },
+  }}
+/>
+
+### Attributes Interface
+
+<TypeTable
+  type={{
+    display_type: {
+      description:
+        "The display type of the attribute, which can be 'number', 'boost', 'boost_percentage', 'date', or 'string'.",
+      type: "'number' | 'boost' | 'boost_percentage' | 'date' | 'string'",
+      default: "'string'",
+    },
+    trait_type: {
+      description: "The name of the attribute.",
+      type: "string",
+    },
+    value: {
+      description: "The value of the attribute.",
+      type: "string",
+    },
+  }}
+/>
 
 ## Metadata Validation
 
@@ -77,7 +176,10 @@ To ensure consistency and correctness, the metadata needs to be validated agains
 Learn more about the [metadata validation process](/docs/znft/metadata-validation).
 
 <Callout type="warn">
-  The metadata validation process is crucial for maintaining the integrity of the ZoAO ecosystem. It ensures that all tokens adhere to the defined schema, preventing potential issues that could arise from malformed or incomplete metadata.
+  The metadata validation process is crucial for maintaining the integrity of
+  the ZoAO ecosystem. It ensures that all tokens adhere to the defined schema,
+  preventing potential issues that could arise from malformed or incomplete
+  metadata.
 </Callout>
 
 ## Summary
